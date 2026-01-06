@@ -1,8 +1,8 @@
 <template>
     <div>
         <h2>热门推荐</h2>
-        <p v-for="book in books" :key="book.id">
-            <router-link to="" >{{book.title}} ￥{{book.price}}</router-link>
+        <p v-for="book in books" :key="book.id || book.productId">
+            <router-link :to="`/book/${book.productId || book.id}`" >{{book.title || book.name}} ￥{{book.price}}</router-link>
         </p>
     </div>
 </template>
@@ -10,12 +10,11 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 
-const books=ref("")
+const books=ref([])
 onMounted(() => {
     axios.get('/book/hot')
     .then(res=>{
-        console.log("hot:",res);
-        books.value=res.data
+        books.value=res.data || []
     })
     .catch(err=>{
         console.log(err)

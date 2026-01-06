@@ -18,13 +18,12 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 
-const books=ref("")
+const books=ref([])
 onMounted(() => {
     axios
     .get("/listByPage?pageNum=1&pageSize=8")
     .then(res => {
-        console.log("new:",res);
-        books.value=res.data.data.list
+        books.value=res.data?.data?.list || []
     })
     .catch(err=>{
         console.log(err);
@@ -36,10 +35,11 @@ onMounted(() => {
 
 .list-item{
     display: flex;
-    
+    flex-wrap: wrap;
+    gap: 12px;
 }
 .item{
-    flex:20%;
+    flex: 1 1 20%;
 }
 
     
