@@ -30,7 +30,7 @@ onMounted(()=>{
         <p class="subtitle">关键字：{{ keyword || '全部' }}</p>
       </header>
       <div v-if="loading" class="empty">搜索中...</div>
-      <div v-else-if="!books.length" class="empty">暂无匹配的书籍</div>
+      <div v-else-if="!books.length" class="empty">暂无匹配的商品</div>
       <div v-else class="book-list-container">
         <div class="book-item" v-for="book in books" :key="book.productId">
           <router-link :to="`/book/${book.productId}`">

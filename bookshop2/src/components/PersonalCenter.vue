@@ -25,7 +25,7 @@
       </router-link>
       <router-link to="/favorites" class="tile">
         <p class="title">收藏夹</p>
-        <p class="desc">管理关注的书籍</p>
+        <p class="desc">管理关注的商品</p>
       </router-link>
     </div>
   </section>

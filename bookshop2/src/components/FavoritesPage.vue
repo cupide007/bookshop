@@ -2,11 +2,11 @@
   <section class="page">
     <header class="page-header">
       <h2>收藏夹</h2>
-      <p class="subtitle">查看已收藏的书籍，随时加入购物车</p>
+      <p class="subtitle">查看已收藏的商品，随时加入购物车</p>
     </header>
 
     <div v-if="!favorites.length" class="empty">
-      <p>还没有收藏任何书籍</p>
+      <p>还没有收藏任何商品</p>
       <router-link class="link" to="/">去首页发现更多</router-link>
     </div>
 
