@@ -8,7 +8,9 @@
     <div class="form-card" v-if="orderNumber">
       <p class="order-label">待支付订单号</p>
       <p class="order-number">{{ orderNumber }}</p>
-      <button class="action primary" @click="handlePay">立即支付</button>
+      <button class="action primary" :disabled="paid || isPaying" v-if="!paid" @click="handlePay">
+        {{ isPaying ? '支付中...' : '立即支付' }}
+      </button>
       <p v-if="message" class="info">{{ message }}</p>
       <router-link class="link" to="/orders">返回订单列表</router-link>
     </div>
@@ -29,15 +31,21 @@ const userStore = useUserStore()
 
 const orderNumber = ref('')
 const message = ref('')
+const paid = ref(false)
+const isPaying = ref(false)
 
 const handlePay = async () => {
   if (!orderNumber.value) return
+  if (paid.value) return
+  isPaying.value = true
   const res = await userStore.payOrder(orderNumber.value)
   if (res?.success) {
     message.value = '支付成功'
+    paid.value = true
   } else {
     message.value = res?.message || '支付失败'
   }
+  isPaying.value = false
 }
 
 onMounted(() => {
