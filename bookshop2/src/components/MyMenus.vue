@@ -23,8 +23,6 @@ const router = useRouter()
 
 const navItems = [
   { path: '/', name: '主页' },
-  { path: '/new-books', name: '新书上市' },
-  { path: '/hot-recommend', name: '热门推荐' },
   { path: '/video-resources', name: '视频资源' },
   { path: '/cart', name: '购物车' },
   { path: '/orders', name: '订单中心' },
