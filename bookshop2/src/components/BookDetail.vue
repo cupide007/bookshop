@@ -69,8 +69,8 @@
             <span class="time">{{ item.commentDate || item.createdAt || '' }}</span>
           </div>
           <p class="content">{{ item.comment }}</p>
-          <div v-if="item.imageUrl" class="review-images">
-            <img :src="resolveImage(item.imageUrl)" alt="">
+          <div v-if="parseImages(item.imageUrl).length" class="review-images">
+            <img v-for="(img, idx) in parseImages(item.imageUrl)" :key="idx" :src="resolveImage(img)" alt="">
           </div>
         </article>
       </div>
@@ -126,7 +126,10 @@ const discountLabel = computed(() => {
 
 const resolveImage = (src) => {
   if (!src) return 'https://via.placeholder.com/360x440?text=Goods'
-  return src.startsWith('http') ? src : `/api/res/images/${src}`
+  if (src.startsWith('http')) return src
+  if (src.startsWith('/api')) return src
+  if (src.startsWith('/res/')) return `/api${src}`
+  return `/api/res/images/${src.replace(/^\//, '')}`
 }
 
 const decrease = () => {
@@ -254,6 +257,15 @@ const handleImageChange = (event) => {
 
 const clearImage = () => {
   resetImage()
+}
+
+const parseImages = (value) => {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return String(value)
+    .split(';')
+    .map((v) => v.trim())
+    .filter(Boolean)
 }
 
 watch(() => route.params.id, () => {
