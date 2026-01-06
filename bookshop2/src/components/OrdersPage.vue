@@ -32,7 +32,7 @@
           <button
             v-if="order.status === 'pending'"
             class="pay-btn"
-            @click="pay(order.orderNumber)"
+            @click="toPay(order.orderNumber)"
           >
             立即支付
           </button>
@@ -43,28 +43,21 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const orders = computed(() => userStore.orders)
-const message = ref('')
+const router = useRouter()
 
 const resolveImage = (src) => {
   if (!src) return 'https://via.placeholder.com/60x80?text=Book'
   return src.startsWith('http') ? src : `/api/res/images/${src}`
 }
 
-const pay = async (orderNumber) => {
-  const res = await userStore.payOrder(orderNumber)
-  if (res?.success) {
-    message.value = '支付成功'
-  } else {
-    message.value = res?.message || '支付失败'
-  }
-  setTimeout(() => {
-    message.value = ''
-  }, 3000)
+const toPay = (orderNumber) => {
+  router.push({ path: '/pay', query: { orderNumber } })
 }
 
 onMounted(() => {
