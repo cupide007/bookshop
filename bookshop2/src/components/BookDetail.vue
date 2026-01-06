@@ -31,23 +31,53 @@
       </div>
     </div>
 
-    <BookTab :introduce="{introduce: book.description}"/>
+    <section class="reviews">
+      <header class="reviews-head">
+        <div>
+          <h3>商品评价</h3>
+          <p class="muted">分享你的购买体验，帮助更多用户</p>
+        </div>
+        <div class="review-form">
+          <textarea
+            v-model="newReview"
+            placeholder="写下你的使用感受"
+            rows="3"
+          ></textarea>
+          <button class="bt-primary" :disabled="submitting" @click="submitReview">
+            {{ submitting ? '提交中...' : '提交评价' }}
+          </button>
+        </div>
+      </header>
+      <div v-if="reviews.length" class="review-list">
+        <article v-for="item in reviews" :key="item.id || item.commentId" class="review-card">
+          <div class="review-meta">
+            <span class="name">{{ item.username || '匿名用户' }}</span>
+            <span class="time">{{ item.commentDate || item.createdAt || '' }}</span>
+          </div>
+          <p class="content">{{ item.content }}</p>
+        </article>
+      </div>
+      <div v-else class="empty">还没有评价，快来成为第一个吧</div>
+    </section>
   </section>
 </template>
 <script setup>
 import qs from 'qs'
 import axios from "axios"
 import { computed, onMounted, ref, watch } from "vue"
-import { useRoute } from "vue-router"
-import BookTab from "./BookTab.vue"
+import { useRoute, useRouter } from "vue-router"
 import { useUserStore } from "@/stores/user"
 import { toast } from "@/utils/feedback"
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 const book = ref({})
 const count = ref(1)
 const imageList = ref([])
+const reviews = ref([])
+const newReview = ref('')
+const submitting = ref(false)
 
 const favoriteText = computed(() => userStore.favoriteIds.includes(book.value.productId) ? '取消收藏' : '收藏')
 
@@ -107,8 +137,53 @@ const fetchDetail = async () => {
     book.value = res.data?.data || {}
     imageList.value = (book.value.description || "").split(";").filter(Boolean)
     userStore.fetchFavorites()
+    fetchReviews()
   } catch (error) {
     toast('商品详情加载失败', 'error')
+  }
+}
+
+const fetchReviews = async () => {
+  const id = route.params.id
+  if (!id) return
+  try {
+    const res = await axios.get('/comments', { params: { productId: id } })
+    if (res.data?.success) {
+      reviews.value = res.data.data || []
+    } else {
+      reviews.value = []
+    }
+  } catch (e) {
+    reviews.value = []
+  }
+}
+
+const submitReview = async () => {
+  if (!userStore.isLoggedIn) {
+    toast('请先登录后再评价', 'error')
+    router.push({ path: '/login', query: { redirect: route.fullPath } })
+    return
+  }
+  if (!newReview.value.trim()) {
+    toast('请输入评价内容', 'error')
+    return
+  }
+  const id = book.value.productId
+  if (!id) return
+  submitting.value = true
+  try {
+    const res = await axios.post('/addComment', { productId: id, content: newReview.value.trim() })
+    if (res.data?.success) {
+      toast(res.data?.message || '评价成功', 'success')
+      newReview.value = ''
+      await fetchReviews()
+    } else {
+      toast(res.data?.message || '评价失败', 'error')
+    }
+  } catch (e) {
+    toast('评价失败', 'error')
+  } finally {
+    submitting.value = false
   }
 }
 
