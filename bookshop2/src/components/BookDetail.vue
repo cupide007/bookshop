@@ -5,21 +5,28 @@
         <img :src="resolveImage(book.imageUrl)" alt="" />
       </div>
       <div class="info">
-        <h2 class="title">{{ book.name || '商品加载中' }}</h2>
-        <p class="sub">编号：{{ book.productId || '-' }} · 分类：{{ categoryName }}</p>
-        <div class="price-row">
-          <span class="price">￥{{ book.price || 0 }}</span>
-          <span class="tag">库存 {{ book.stock || 0 }}</span>
-          <span class="tag neutral">{{ discountLabel }}</span>
-        </div>
-        <div class="action-row">
-          <div class="quantity-box">
-            <button @click="decrease">-</button>
-            <input type="number" v-model.number="count" min="1" />
-            <button @click="increase">+</button>
+        <div class="info-top">
+          <h2 class="title">{{ book.name || '商品加载中' }}</h2>
+          <p class="sub">编号：{{ book.productId || '-' }} · 分类：{{ categoryName }}</p>
+          <div class="price-row">
+            <span class="price">￥{{ book.price || 0 }}</span>
+            <span class="tag">库存 {{ book.stock || 0 }}</span>
+            <span class="tag neutral">{{ discountLabel }}</span>
           </div>
-          <button class="bt-primary" @click="addCart">加入购物车</button>
-          <button class="bt-secondary" @click="toggleFav">{{ favoriteText }}</button>
+          <div class="action-row">
+            <div class="quantity-box">
+              <button @click="decrease">-</button>
+              <input type="number" v-model.number="count" min="1" />
+              <button @click="increase">+</button>
+            </div>
+            <button class="bt-primary" @click="addCart">加入购物车</button>
+            <button class="bt-secondary" @click="toggleFav">{{ favoriteText }}</button>
+          </div>
+        </div>
+        <div class="thumb-panel" v-if="imageList.length">
+          <div v-for="(image,index) in imageList" :key="index" class="thumb-item large">
+            <img :src="resolveImage(image)" alt="">
+          </div>
         </div>
       </div>
     </div>
@@ -31,6 +38,9 @@
           <p class="muted">分享你的购买体验，帮助更多用户</p>
         </div>
         <div class="review-form">
+          <select v-model.number="rating" class="rating-select">
+            <option v-for="n in 5" :key="n" :value="n">{{ n }} 星</option>
+          </select>
           <textarea
             v-model="newReview"
             placeholder="写下你的使用感受"
@@ -45,6 +55,7 @@
         <article v-for="item in reviews" :key="item.id || item.commentId" class="review-card">
           <div class="review-meta">
             <span class="name">{{ item.username || '匿名用户' }}</span>
+            <span class="stars">{{ renderStars(item.rating) }}</span>
             <span class="time">{{ item.commentDate || item.createdAt || '' }}</span>
           </div>
           <p class="content">{{ item.content }}</p>
@@ -76,6 +87,7 @@ const count = ref(1)
 const imageList = ref([])
 const reviews = ref([])
 const newReview = ref('')
+const rating = ref(5)
 const submitting = ref(false)
 
 const favoriteText = computed(() => userStore.favoriteIds.includes(book.value.productId) ? '取消收藏' : '收藏')
@@ -122,6 +134,12 @@ const toggleFav = () => {
   userStore.toggleFavorite(id)
 }
 
+const renderStars = (value) => {
+  const score = Number(value) || 0
+  const full = Math.max(0, Math.min(5, Math.round(score)))
+  return '★'.repeat(full) + '☆'.repeat(5 - full)
+}
+
 const fetchDetail = async () => {
   const id = route.params.id
   if (!id) return
@@ -165,7 +183,7 @@ const submitReview = async () => {
   if (!id) return
   submitting.value = true
   try {
-    const res = await axios.post('/addReview', { productId: id, content: newReview.value.trim() })
+    const res = await axios.post('/addReview', { productId: id, content: newReview.value.trim(), rating: rating.value })
     if (res.data?.success) {
       toast(res.data?.message || '评价成功', 'success')
       newReview.value = ''
@@ -210,8 +228,13 @@ watch(() => route.params.id, () => {
 .info{
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   color: #374151;
+}
+.info-top{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .title{
   margin: 0;
@@ -289,6 +312,18 @@ watch(() => route.params.id, () => {
   border-radius: 10px;
   cursor: pointer;
 }
+.thumb-panel{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.thumb-item.large img{
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #f3f4f6;
+}
 .thumbs{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -301,5 +336,78 @@ watch(() => route.params.id, () => {
   object-fit: cover;
   border-radius: 8px;
   background: #f9fafb;
+}
+.reviews{
+  margin-top: 20px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+.reviews-head{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.muted{
+  color: #6b7280;
+  margin: 4px 0 0;
+}
+.review-form{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.rating-select{
+  height: 38px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+.review-form textarea{
+  flex: 1;
+  min-width: 240px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.review-list{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.review-card{
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+.review-meta{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.name{
+  font-weight: 600;
+}
+.stars{
+  color: #f59e0b;
+  font-size: 14px;
+}
+.time{
+  color: #9ca3af;
+  font-size: 13px;
+}
+.content{
+  margin: 8px 0 0;
+  color: #4b5563;
+}
+.empty{
+  margin-top: 12px;
+  color: #6b7280;
 }
 </style>
