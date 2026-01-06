@@ -26,21 +26,24 @@ public class UploadController {
             File path = new File(ResourceUtils.getURL("classpath:").getPath());
             if (!path.exists()) path = new File("");
 
-            File uploadDir = new File(path.getAbsolutePath(), "static/res/images/");
+            File uploadDir = new File(path.getAbsolutePath(), "static/images/");
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
             String originalFilename = file.getOriginalFilename();
-            String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String newFileName = UUID.randomUUID().toString() + suffix;
+            String suffix = null;
+            if (originalFilename != null) {
+                suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String newFileName = UUID.randomUUID()+ suffix;
 
             File dest = new File(uploadDir.getAbsolutePath() + File.separator + newFileName);
             file.transferTo(dest);
 
             return FwResult.ok(newFileName);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return FwResult.failedMsg("文件上传失败");
         }
     }

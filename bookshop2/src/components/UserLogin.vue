@@ -49,30 +49,27 @@
 import { ref, reactive } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { toast } from '@/utils/feedback'
 
-// 1. 初始化路由实例（修复未声明router的问题）
 const router = useRouter()
+const userStore = useUserStore()
 
-// 表单数据
 const form = reactive({
   account: '',
   password: ''
 })
 
-// 验证信息
 const validate = reactive({
   account: '',
   password: ''
 })
 
-// 加载状态
 const isLoading = ref(false)
 
-// 表单验证
 const validateForm = () => {
   let isValid = true
   
-  // 账号验证
   if (!form.account.trim()) {
     validate.account = '请输入账号'
     isValid = false
@@ -80,7 +77,6 @@ const validateForm = () => {
     validate.account = ''
   }
 
-  // 密码验证
   if (!form.password.trim()) {
     validate.password = '请输入密码'
     isValid = false
@@ -94,40 +90,38 @@ const validateForm = () => {
   return isValid
 }
 
-// 登录处理（完整闭合所有语法结构，修复所有错误）
 const handleLogin = async () => {
-  // 先验证表单
   if (!validateForm()) return
 
-  // 开启加载状态
   isLoading.value = true
 
   try {
-    // 修复：参数匹配（表单是account，请求时传username，统一为account或username）
     const response = await axios.post("/login", {
-      username: form.account, // 表单绑定的是account，这里映射为接口需要的username
+      username: form.account,
       password: form.password
     })
 
     console.log(response.data)
-    alert(response.data.message || '登录成功')
+    toast(response.data.message || '登录成功', 'success')
 
-    // 修复：nill → null（拼写错误）
-    if (response.data.data !== null) {
-      sessionStorage.setItem("Authorization", response.data.data)
-    }
+    const payload = response.data.data || {}
+    userStore.setUser({
+      token: payload.token || '',
+      username: payload.username || form.account,
+      userId: payload.userId
+    })
+    await userStore.fetchCart()
+    await userStore.fetchFavorites()
 
-    // 登录成功跳转首页
     if (response.data.status === 200) {
-      router.push('/')
+      router.push(router.currentRoute.value.query.redirect || '/')
     }
   } catch (error) {
-    // 完善错误处理，避免error.response不存在时报错
     if (error.response) {
       if (error.response.status === 504) {
-        alert("服务器没有启动")
+        toast('服务器没有启动', 'error')
       } else if (error.response.status === 500) {
-        alert("服务器运行出错")
+        toast('服务器运行出错', 'error')
       }
     }
     }
@@ -135,16 +129,13 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* 整体容器样式 */
 .login-container {
-  /* min-height: 100vh; */
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #f5f5f5;
 }
 
-/* 登录卡片 */
 .login-card {
   width: 400px;
   padding: 30px;
@@ -153,7 +144,6 @@ const handleLogin = async () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 登录标题 */
 .login-title {
   text-align: center;
   margin: 0 0 24px 0;
@@ -162,18 +152,15 @@ const handleLogin = async () => {
   font-weight: 600;
 }
 
-/* 表单样式 */
 .login-form {
   width: 100%;
 }
 
-/* 表单项 */
 .form-item {
   margin-bottom: 20px;
   position: relative;
 }
 
-/* 标签样式 */
 .form-label {
   display: block;
   margin-bottom: 8px;
@@ -181,7 +168,6 @@ const handleLogin = async () => {
   font-size: 14px;
 }
 
-/* 输入框样式 */
 .form-input {
   width: 100%;
   height: 40px;
@@ -198,12 +184,10 @@ const handleLogin = async () => {
   border-color: #409eff;
 }
 
-/* 错误状态 */
 .input-error {
   border-color: #f56c6c;
 }
 
-/* 错误提示 */
 .error-tip {
   position: absolute;
   bottom: -20px;
@@ -212,7 +196,6 @@ const handleLogin = async () => {
   font-size: 12px;
 }
 
-/* 登录按钮 */
 .login-btn {
   width: 100%;
   height: 40px;

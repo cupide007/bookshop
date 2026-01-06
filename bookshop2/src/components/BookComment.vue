@@ -1,5 +1,5 @@
 <template>
-    <h3>图书评论</h3>
+    <h3>商品评论</h3>
     <div v-for="(item,index) in comments" :key="index" class="comment">
         <p>{{item.username}} <span style="margin-left:50px">{{item.commentDate}}</span></p>
         <p>{{item.content}}</p>
