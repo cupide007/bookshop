@@ -46,6 +46,16 @@
             placeholder="写下你的使用感受"
             rows="3"
           ></textarea>
+          <div class="uploader">
+            <label class="upload-label">
+              <span>上传图片</span>
+              <input type="file" accept="image/*" @change="handleImageChange">
+            </label>
+            <div v-if="uploadPreview" class="preview">
+              <img :src="uploadPreview" alt="">
+              <button type="button" class="clear" @click="clearImage">移除</button>
+            </div>
+          </div>
           <button class="bt-primary" :disabled="submitting" @click="submitReview">
             {{ submitting ? '提交中...' : '提交评价' }}
           </button>
@@ -58,7 +68,10 @@
             <span class="stars">{{ renderStars(item.rating) }}</span>
             <span class="time">{{ item.commentDate || item.createdAt || '' }}</span>
           </div>
-          <p class="content">{{ item.content }}</p>
+          <p class="content">{{ item.comment }}</p>
+          <div v-if="item.imageUrl" class="review-images">
+            <img :src="resolveImage(item.imageUrl)" alt="">
+          </div>
         </article>
       </div>
       <div v-else class="empty">还没有评价，快来成为第一个吧</div>
@@ -89,6 +102,8 @@ const reviews = ref([])
 const newReview = ref('')
 const rating = ref(5)
 const submitting = ref(false)
+const selectedFile = ref(null)
+const uploadPreview = ref('')
 
 const favoriteText = computed(() => userStore.favoriteIds.includes(book.value.productId) ? '取消收藏' : '收藏')
 
@@ -182,11 +197,31 @@ const submitReview = async () => {
   const id = book.value.productId
   if (!id) return
   submitting.value = true
+  let imageUrl = ''
+  if (selectedFile.value) {
+    try {
+      const form = new FormData()
+      form.append('file', selectedFile.value)
+      const uploadRes = await axios.post('/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      if (uploadRes.data?.success) {
+        imageUrl = uploadRes.data.data
+      } else {
+        toast(uploadRes.data?.message || '图片上传失败', 'error')
+      }
+    } catch (e) {
+      toast('图片上传失败', 'error')
+    }
+  }
   try {
-    const res = await axios.post('/addReview', { productId: id, content: newReview.value.trim(), rating: rating.value })
+    const payload = { productId: id, comment: newReview.value.trim(), rating: rating.value }
+    if (imageUrl) {
+      payload.imageUrl = imageUrl
+    }
+    const res = await axios.post('/addReview', payload)
     if (res.data?.success) {
       toast(res.data?.message || '评价成功', 'success')
       newReview.value = ''
+      resetImage()
       await fetchReviews()
     } else {
       toast(res.data?.message || '评价失败', 'error')
@@ -199,6 +234,27 @@ const submitReview = async () => {
 }
 
 onMounted(fetchDetail)
+
+const resetImage = () => {
+  if (uploadPreview.value) {
+    URL.revokeObjectURL(uploadPreview.value)
+  }
+  selectedFile.value = null
+  uploadPreview.value = ''
+}
+
+const handleImageChange = (event) => {
+  const file = event.target.files?.[0]
+  resetImage()
+  if (file) {
+    selectedFile.value = file
+    uploadPreview.value = URL.createObjectURL(file)
+  }
+}
+
+const clearImage = () => {
+  resetImage()
+}
 
 watch(() => route.params.id, () => {
   count.value = 1
@@ -374,6 +430,45 @@ watch(() => route.params.id, () => {
   border-radius: 8px;
   padding: 8px 10px;
 }
+.uploader{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.upload-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed #9ca3af;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 14px;
+}
+.upload-label input{
+  display: none;
+}
+.preview{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview img{
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.clear{
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 .review-list{
   display: flex;
   flex-direction: column;
@@ -405,6 +500,16 @@ watch(() => route.params.id, () => {
 .content{
   margin: 8px 0 0;
   color: #4b5563;
+}
+.review-images{
+  margin-top: 8px;
+}
+.review-images img{
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
 }
 .empty{
   margin-top: 12px;
