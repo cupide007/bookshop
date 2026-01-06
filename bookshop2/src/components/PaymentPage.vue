@@ -2,16 +2,18 @@
   <section class="page">
     <header class="page-header">
       <h2>支付订单</h2>
-      <p class="subtitle">请输入或确认订单号后完成支付</p>
+      <p class="subtitle">确认订单并完成支付</p>
     </header>
 
-    <div class="form-card">
-      <label class="field">
-        <span>订单号</span>
-        <input v-model="orderNumber" type="text" placeholder="请输入订单号" />
-      </label>
-      <button class="action primary" :disabled="!orderNumber" @click="handlePay">立即支付</button>
+    <div class="form-card" v-if="orderNumber">
+      <p class="order-label">待支付订单号</p>
+      <p class="order-number">{{ orderNumber }}</p>
+      <button class="action primary" @click="handlePay">立即支付</button>
       <p v-if="message" class="info">{{ message }}</p>
+      <router-link class="link" to="/orders">返回订单列表</router-link>
+    </div>
+    <div v-else class="form-card">
+      <p>暂无待支付订单</p>
       <router-link class="link" to="/orders">返回订单列表</router-link>
     </div>
   </section>
@@ -81,6 +83,17 @@ onMounted(() => {
   padding: 0 10px;
   border: 1px solid #dcdfe6;
   border-radius: 8px;
+}
+
+.order-label {
+  margin: 0;
+  color: #666;
+}
+
+.order-number {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 14px;
 }
 
 .action.primary {
