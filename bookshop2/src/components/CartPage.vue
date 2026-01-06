@@ -52,11 +52,13 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const successMessage = ref('')
 const newOrderNumber = ref('')
+const router = useRouter()
 
 const cartItems = computed(() => userStore.cart)
 const cartCount = computed(() => userStore.cartCount)
@@ -75,26 +77,13 @@ const submitOrder = async () => {
   const orderNumber = await userStore.checkout()
   if (orderNumber) {
     newOrderNumber.value = orderNumber
-    successMessage.value = `订单提交成功（编号：${orderNumber}），请尽快支付`
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
+    router.push({ path: '/pay', query: { orderNumber } })
   }
 }
 
 const payNow = async () => {
   if (!newOrderNumber.value) return
-  const res = await userStore.payOrder(newOrderNumber.value)
-  if (res?.success) {
-    successMessage.value = '支付成功'
-    newOrderNumber.value = ''
-    await userStore.fetchOrders()
-  } else {
-    successMessage.value = res?.message || '支付失败'
-  }
-  setTimeout(() => {
-    successMessage.value = ''
-  }, 3000)
+  router.push({ path: '/pay', query: { orderNumber: newOrderNumber.value } })
 }
 
 onMounted(() => {
