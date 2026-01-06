@@ -36,14 +36,14 @@ public class UploadController {
             if (originalFilename != null) {
                 suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
-            String newFileName = UUID.randomUUID().toString() + suffix;
+            String newFileName = UUID.randomUUID()+ suffix;
 
             File dest = new File(uploadDir.getAbsolutePath() + File.separator + newFileName);
             file.transferTo(dest);
 
             return FwResult.ok(newFileName);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
             return FwResult.failedMsg("文件上传失败");
         }
     }
