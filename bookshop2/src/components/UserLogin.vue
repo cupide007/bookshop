@@ -50,6 +50,7 @@ import { ref, reactive } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { toast } from '@/utils/feedback'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -101,7 +102,7 @@ const handleLogin = async () => {
     })
 
     console.log(response.data)
-    alert(response.data.message || '登录成功')
+    toast(response.data.message || '登录成功', 'success')
 
     const payload = response.data.data || {}
     userStore.setUser({
@@ -118,9 +119,9 @@ const handleLogin = async () => {
   } catch (error) {
     if (error.response) {
       if (error.response.status === 504) {
-        alert("服务器没有启动")
+        toast('服务器没有启动', 'error')
       } else if (error.response.status === 500) {
-        alert("服务器运行出错")
+        toast('服务器运行出错', 'error')
       }
     }
     }
