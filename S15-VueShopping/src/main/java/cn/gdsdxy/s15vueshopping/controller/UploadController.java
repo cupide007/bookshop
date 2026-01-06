@@ -26,7 +26,7 @@ public class UploadController {
             File path = new File(ResourceUtils.getURL("classpath:").getPath());
             if (!path.exists()) path = new File("");
 
-            File uploadDir = new File(path.getAbsolutePath(), "static/res/images/");
+            File uploadDir = new File(path.getAbsolutePath(), "static/images/");
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
