@@ -31,7 +31,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>© 2024 书城商城 | 提供图书检索、购物车、订单、收藏等功能</p>
+      <p>© 2024 优品商城 | 提供商品检索、购物车、订单、收藏等功能</p>
     </footer>
     <ToastHost/>
   </div>
