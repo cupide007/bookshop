@@ -1,22 +1,21 @@
 <template>
-    <div class="home">
-        <aside class="side">
-            <BookCategory/>
-        </aside>
+  <div class="home">
+    <div class="content">
+      <BookCategory/>
     </div>
+  </div>
 </template>
 <script setup>
 import BookCategory from './BookCategory.vue'
 </script>
 <style>
 .home{
-    width: 100%;
-    margin-top: 30px;
+  width: 100%;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
-.side{
-    background: #fff;
-    padding: 12px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+.content{
+  width: 1200px;
 }
 </style>
