@@ -54,8 +54,14 @@ export const useUserStore = defineStore('user', {
       try {
         const res = await axios.get('/addCart', { params: { productId, quantity } })
         if (res.data?.success) {
-          alert(res.data?.message || '已添加购物车')
+          const targetQuantity = Math.max(1, quantity)
           await this.fetchCart()
+          const current = this.cart.find((item) => item.productId === productId)
+          const finalQuantity = current ? current.quantity + (targetQuantity - 1) : targetQuantity
+          if (finalQuantity > 1) {
+            await this.updateCart(productId, finalQuantity, false)
+          }
+          alert(res.data?.message || '已添加购物车')
           return true
         }
         alert(res.data?.message || '添加购物车失败')
@@ -65,18 +71,24 @@ export const useUserStore = defineStore('user', {
         return false
       }
     },
-    async updateCart(productId, quantity) {
+    async updateCart(productId, quantity, showAlert = true) {
       if (!productId) return
       try {
         const res = await axios.get('/updateCart', { params: { productId, quantity } })
         if (res.data?.success) {
-          alert(res.data?.message || '数量更新成功')
+          if (showAlert) {
+            alert(res.data?.message || '数量更新成功')
+          }
           await this.fetchCart()
           return true
         }
-        alert(res.data?.message || '更新数量失败')
+        if (showAlert) {
+          alert(res.data?.message || '更新数量失败')
+        }
       } catch (e) {
-        alert('更新数量失败')
+        if (showAlert) {
+          alert('更新数量失败')
+        }
       }
     },
     async removeFromCart(productId) {
