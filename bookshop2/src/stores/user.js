@@ -38,47 +38,104 @@ export const useUserStore = defineStore('user', {
     },
     async fetchCart() {
       if (!this.token) return
-      const res = await axios.post('/myCart')
-      if (res.data?.success) {
-        this.cart = res.data.data || []
+      try {
+        const res = await axios.post('/myCart')
+        if (res.data?.success) {
+          this.cart = res.data.data || []
+        } else {
+          alert(res.data?.message || '获取购物车失败')
+        }
+      } catch (e) {
+        alert('获取购物车失败')
       }
     },
     async addToCart(productId, quantity = 1) {
       if (!productId) return
-      await axios.get('/addCart', { params: { productId, quantity } })
-      await this.fetchCart()
+      try {
+        const res = await axios.get('/addCart', { params: { productId, quantity } })
+        if (res.data?.success) {
+          alert(res.data?.message || '已添加购物车')
+          await this.fetchCart()
+          return true
+        }
+        alert(res.data?.message || '添加购物车失败')
+        return false
+      } catch (e) {
+        alert('添加购物车失败')
+        return false
+      }
     },
     async updateCart(productId, quantity) {
       if (!productId) return
-      await axios.get('/updateCart', { params: { productId, quantity } })
-      await this.fetchCart()
+      try {
+        const res = await axios.get('/updateCart', { params: { productId, quantity } })
+        if (res.data?.success) {
+          alert(res.data?.message || '数量更新成功')
+          await this.fetchCart()
+          return true
+        }
+        alert(res.data?.message || '更新数量失败')
+      } catch (e) {
+        alert('更新数量失败')
+      }
     },
     async removeFromCart(productId) {
       if (!productId) return
-      await axios.get('/deleteCart', { params: { productId } })
-      await this.fetchCart()
+      try {
+        const res = await axios.get('/deleteCart', { params: { productId } })
+        if (res.data?.success) {
+          alert(res.data?.message || '商品已删除')
+          await this.fetchCart()
+          return true
+        }
+        alert(res.data?.message || '删除失败')
+      } catch (e) {
+        alert('删除失败')
+      }
     },
     async fetchFavorites() {
       if (!this.token) return
-      const res = await axios.get('/myFavorites')
-      if (res.data?.success) {
-        this.favorites = res.data.data || []
+      try {
+        const res = await axios.get('/myFavorites')
+        if (res.data?.success) {
+          this.favorites = res.data.data || []
+        } else {
+          alert(res.data?.message || '获取收藏失败')
+        }
+      } catch (e) {
+        alert('获取收藏失败')
       }
     },
     async toggleFavorite(productId) {
       if (!productId) return
-      if (this.favoriteIds.includes(productId)) {
-        await axios.get('/removeFavorite', { params: { productId } })
-      } else {
-        await axios.get('/addFavorite', { params: { productId } })
+      try {
+        let res
+        if (this.favoriteIds.includes(productId)) {
+          res = await axios.get('/removeFavorite', { params: { productId } })
+        } else {
+          res = await axios.get('/addFavorite', { params: { productId } })
+        }
+        if (res?.data?.success) {
+          alert(res.data?.message || '操作成功')
+          await this.fetchFavorites()
+        } else {
+          alert(res?.data?.message || '操作失败')
+        }
+      } catch (e) {
+        alert('操作失败')
       }
-      await this.fetchFavorites()
     },
     async fetchOrders() {
       if (!this.token) return
-      const res = await axios.get('/myOrders')
-      if (res.data?.success) {
-        this.orders = res.data.data || []
+      try {
+        const res = await axios.get('/myOrders')
+        if (res.data?.success) {
+          this.orders = res.data.data || []
+        } else {
+          alert(res.data?.message || '获取订单失败')
+        }
+      } catch (e) {
+        alert('获取订单失败')
       }
     },
     async checkout(addressId = 1) {
@@ -87,22 +144,36 @@ export const useUserStore = defineStore('user', {
         productId: item.productId || item.id,
         quantity: item.quantity
       }))
-      const res = await axios.post('/order', orderVoList, { params: { addressId } })
-      if (res.data?.success) {
-        this.lastOrderNumber = res.data.data || ''
-        await this.fetchCart()
-        await this.fetchOrders()
-        return res.data.data
+      try {
+        const res = await axios.post('/order', orderVoList, { params: { addressId } })
+        if (res.data?.success) {
+          this.lastOrderNumber = res.data.data || ''
+          alert(res.data?.message || '下单成功')
+          await this.fetchCart()
+          await this.fetchOrders()
+          return res.data.data
+        }
+        alert(res.data?.message || '下单失败')
+      } catch (e) {
+        alert('下单失败')
       }
       return null
     },
     async payOrder(orderNumber) {
       if (!orderNumber) return null
-      const res = await axios.post('/payOrder', null, { params: { orderNumber } })
-      if (res.data?.success) {
-        await this.fetchOrders()
+      try {
+        const res = await axios.post('/payOrder', null, { params: { orderNumber } })
+        if (res.data?.success) {
+          alert(res.data?.message || '支付成功')
+          await this.fetchOrders()
+        } else {
+          alert(res.data?.message || '支付失败')
+        }
+        return res.data
+      } catch (e) {
+        alert('支付失败')
+        return null
       }
-      return res.data
     }
   },
   persist: true
