@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { toast } from '@/utils/feedback'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -43,10 +44,10 @@ export const useUserStore = defineStore('user', {
         if (res.data?.success) {
           this.cart = res.data.data || []
         } else {
-          alert(res.data?.message || '获取购物车失败')
+          toast(res.data?.message || '获取购物车失败', 'error')
         }
       } catch (e) {
-        alert('获取购物车失败')
+        toast('获取购物车失败', 'error')
       }
     },
     async addToCart(productId, quantity = 1) {
@@ -61,13 +62,13 @@ export const useUserStore = defineStore('user', {
           if (finalQuantity > 1) {
             await this.updateCart(productId, finalQuantity, false)
           }
-          alert(res.data?.message || '已添加购物车')
+          toast(res.data?.message || '已添加购物车', 'success')
           return true
         }
-        alert(res.data?.message || '添加购物车失败')
+        toast(res.data?.message || '添加购物车失败', 'error')
         return false
       } catch (e) {
-        alert('添加购物车失败')
+        toast('添加购物车失败', 'error')
         return false
       }
     },
@@ -77,32 +78,34 @@ export const useUserStore = defineStore('user', {
         const res = await axios.get('/updateCart', { params: { productId, quantity } })
         if (res.data?.success) {
           if (showAlert) {
-            alert(res.data?.message || '数量更新成功')
+            toast(res.data?.message || '数量更新成功', 'success')
           }
           await this.fetchCart()
           return true
         }
         if (showAlert) {
-          alert(res.data?.message || '更新数量失败')
+          toast(res.data?.message || '更新数量失败', 'error')
         }
       } catch (e) {
         if (showAlert) {
-          alert('更新数量失败')
+          toast('更新数量失败', 'error')
         }
       }
     },
     async removeFromCart(productId) {
       if (!productId) return
+      const ok = window.confirm('确定要删除该商品吗？')
+      if (!ok) return
       try {
         const res = await axios.get('/deleteCart', { params: { productId } })
         if (res.data?.success) {
-          alert(res.data?.message || '商品已删除')
+          toast(res.data?.message || '商品已删除', 'success')
           await this.fetchCart()
           return true
         }
-        alert(res.data?.message || '删除失败')
+        toast(res.data?.message || '删除失败', 'error')
       } catch (e) {
-        alert('删除失败')
+        toast('删除失败', 'error')
       }
     },
     async fetchFavorites() {
@@ -112,10 +115,10 @@ export const useUserStore = defineStore('user', {
         if (res.data?.success) {
           this.favorites = res.data.data || []
         } else {
-          alert(res.data?.message || '获取收藏失败')
+          toast(res.data?.message || '获取收藏失败', 'error')
         }
       } catch (e) {
-        alert('获取收藏失败')
+        toast('获取收藏失败', 'error')
       }
     },
     async toggleFavorite(productId) {
@@ -128,13 +131,13 @@ export const useUserStore = defineStore('user', {
           res = await axios.get('/addFavorite', { params: { productId } })
         }
         if (res?.data?.success) {
-          alert(res.data?.message || '操作成功')
+          toast(res.data?.message || '操作成功', 'success')
           await this.fetchFavorites()
         } else {
-          alert(res?.data?.message || '操作失败')
+          toast(res?.data?.message || '操作失败', 'error')
         }
       } catch (e) {
-        alert('操作失败')
+        toast('操作失败', 'error')
       }
     },
     async fetchOrders() {
@@ -144,10 +147,10 @@ export const useUserStore = defineStore('user', {
         if (res.data?.success) {
           this.orders = res.data.data || []
         } else {
-          alert(res.data?.message || '获取订单失败')
+          toast(res.data?.message || '获取订单失败', 'error')
         }
       } catch (e) {
-        alert('获取订单失败')
+        toast('获取订单失败', 'error')
       }
     },
     async checkout(addressId = 1) {
@@ -160,14 +163,14 @@ export const useUserStore = defineStore('user', {
         const res = await axios.post('/order', orderVoList, { params: { addressId } })
         if (res.data?.success) {
           this.lastOrderNumber = res.data.data || ''
-          alert(res.data?.message || '下单成功')
+          toast(res.data?.message || '下单成功', 'success')
           await this.fetchCart()
           await this.fetchOrders()
           return res.data.data
         }
-        alert(res.data?.message || '下单失败')
+        toast(res.data?.message || '下单失败', 'error')
       } catch (e) {
-        alert('下单失败')
+        toast('下单失败', 'error')
       }
       return null
     },
@@ -176,14 +179,14 @@ export const useUserStore = defineStore('user', {
       try {
         const res = await axios.post('/payOrder', null, { params: { orderNumber } })
         if (res.data?.success) {
-          alert(res.data?.message || '支付成功')
+          toast(res.data?.message || '支付成功', 'success')
           await this.fetchOrders()
         } else {
-          alert(res.data?.message || '支付失败')
+          toast(res.data?.message || '支付失败', 'error')
         }
         return res.data
       } catch (e) {
-        alert('支付失败')
+        toast('支付失败', 'error')
         return null
       }
     }
