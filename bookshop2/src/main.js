@@ -23,5 +23,24 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
+axios.interceptors.response.use(
+  (response) => {
+    if (response?.data?.status === 401) {
+      alert(response?.data?.message || '请先登录')
+      router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+      return Promise.reject(response)
+    }
+    return response
+  },
+  (error) => {
+    const status = error?.response?.status
+    if (status === 401) {
+      alert('请先登录')
+      router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+    }
+    return Promise.reject(error)
+  }
+)
+
 app.use(VueAxios, axios)
 app.mount('#app')

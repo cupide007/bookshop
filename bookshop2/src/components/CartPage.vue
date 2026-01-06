@@ -11,14 +11,24 @@
     </div>
 
     <div v-else class="cart-panel">
+      <div class="cart-header">
+        <span class="col col-product">商品信息</span>
+        <span class="col col-price">单价</span>
+        <span class="col col-qty">数量</span>
+        <span class="col col-op">操作</span>
+      </div>
       <div class="cart-item" v-for="item in cartItems" :key="item.productId">
-        <img :src="resolveImage(item.imageUrl)" alt="" class="thumb">
-        <div class="info">
-          <h3>{{ item.name }}</h3>
-          <p class="price">￥{{ item.price }}</p>
-          <p class="meta">数量：{{ item.quantity }}</p>
+        <div class="col col-product product-cell">
+          <img :src="resolveImage(item.imageUrl)" alt="" class="thumb">
+          <div>
+            <h3>{{ item.name }}</h3>
+          </div>
         </div>
-        <button class="action danger" @click="remove(item.productId)">移除</button>
+        <div class="col col-price price">￥{{ item.price }}</div>
+        <div class="col col-qty meta">数量：{{ item.quantity }}</div>
+        <div class="col col-op">
+          <button class="action danger" @click="remove(item.productId)">移除</button>
+        </div>
       </div>
 
       <footer class="cart-summary">
@@ -121,12 +131,23 @@ onMounted(() => {
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 12px;
+  background: #fff;
+}
+
+.cart-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f3f3;
+  font-weight: 600;
+  color: #444;
 }
 
 .cart-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f3f3f3;
 }
 
@@ -140,6 +161,16 @@ onMounted(() => {
   object-fit: cover;
   border-radius: 4px;
   margin-right: 16px;
+}
+
+.product-cell {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.col {
+  padding: 0 10px;
 }
 
 .info h3 {
@@ -192,6 +223,16 @@ onMounted(() => {
 .action.primary {
   background: #2563eb;
   color: #fff;
+}
+
+.cart-header .col,
+.cart-item .col {
+  text-align: center;
+}
+
+.cart-header .col-product,
+.cart-item .col-product {
+  text-align: left;
 }
 
 .payment-tip{
