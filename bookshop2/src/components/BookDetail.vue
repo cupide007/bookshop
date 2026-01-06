@@ -1,150 +1,237 @@
 <template>
-    <div class="book-detail">
-        <div class="book-left">
-            <img :src="resolveImage(book.imageUrl)" alt="" width="300" height="400">
+  <section class="detail-page">
+    <div class="hero">
+      <div class="gallery-main">
+        <img :src="resolveImage(book.imageUrl)" alt="" />
+      </div>
+      <div class="info">
+        <h2 class="title">{{ book.name || '商品加载中' }}</h2>
+        <p class="sub">编号：{{ book.productId || '-' }} · 分类：{{ categoryName }}</p>
+        <div class="price-row">
+          <span class="price">￥{{ book.price || 0 }}</span>
+          <span class="tag">库存 {{ book.stock || 0 }}</span>
+          <span class="tag neutral">{{ discountLabel }}</span>
         </div>
-        <div class="book-right">
-            <h2>{{book.name}}</h2>
-            <p>
-                <span style="color:red"><strong>￥{{book.price}}</strong></span>
-                <span style="margin-left:20px;color:red">{{10}}折</span>
-                <span style="margin-left:50px">[库存：<span>{{book.stock}}</span>]</span>
-            </p>
-            <p class="desc">{{ book.description || '商品简介加载中...' }}</p>
-            <div class="action-row">
-                <button @click="decrease">-</button>
-                <input type="text" class="quantity" v-model.number="count">
-                <button @click="increase">+</button>
-                <button class="bt-add" @click="addCart">加入购物车</button>
-                <button class="bt-secondary" @click="toggleFav">{{ favoriteText }}</button>
-            </div>
+        <p class="desc">{{ brief }}</p>
+        <div class="action-row">
+          <div class="quantity-box">
+            <button @click="decrease">-</button>
+            <input type="number" v-model.number="count" min="1" />
+            <button @click="increase">+</button>
+          </div>
+          <button class="bt-primary" @click="addCart">加入购物车</button>
+          <button class="bt-secondary" @click="toggleFav">{{ favoriteText }}</button>
         </div>
+      </div>
     </div>
-    <div class="gallery">
-        <div v-for="(image,index) in imageList" :key="index">
-            <img :src="resolveImage(image)">
-        </div>
+
+    <div class="thumbs" v-if="imageList.length">
+      <div v-for="(image,index) in imageList" :key="index" class="thumb-item">
+        <img :src="resolveImage(image)" alt="">
+      </div>
     </div>
+
     <BookTab :introduce="{introduce: book.description}"/>
+  </section>
 </template>
 <script setup>
-import qs from 'qs';
-import axios from "axios";
-import { computed, onMounted,ref } from "vue";
-import { useRoute } from "vue-router";
-import BookTab from "./BookTab.vue";
-import { useUserStore } from "@/stores/user";
+import qs from 'qs'
+import axios from "axios"
+import { computed, onMounted, ref, watch } from "vue"
+import { useRoute } from "vue-router"
+import BookTab from "./BookTab.vue"
+import { useUserStore } from "@/stores/user"
+import { toast } from "@/utils/feedback"
 
-
-const route=useRoute();
+const route = useRoute()
 const userStore = useUserStore()
-const book =ref({});
-const count =ref(1);
-const imageList=ref([]);
+const book = ref({})
+const count = ref(1)
+const imageList = ref([])
+
 const favoriteText = computed(() => userStore.favoriteIds.includes(book.value.productId) ? '取消收藏' : '收藏')
 
+const categoryMap = {
+  1: '电子产品',
+  2: '服装',
+  3: '家居用品',
+  4: '食品'
+}
+
+const categoryName = computed(() => {
+  const id = book.value.categoryId
+  return categoryMap[id] || '其他'
+})
+
+const brief = computed(() => {
+  if (!book.value.description) return '商品简介加载中...'
+  const parts = book.value.description.split(';').filter(Boolean)
+  return parts[0] || book.value.description
+})
+
+const discountLabel = computed(() => {
+  if (book.value.discount) return `${book.value.discount}折`
+  return '热卖'
+})
+
 const resolveImage = (src) => {
-    if (!src) return 'https://via.placeholder.com/300x400?text=Book'
-    return src.startsWith('http') ? src : `/api/res/images/${src}`
+  if (!src) return 'https://via.placeholder.com/360x440?text=Goods'
+  return src.startsWith('http') ? src : `/api/res/images/${src}`
 }
 
 const decrease = () => {
-    count.value = Math.max(1, count.value - 1)
+  count.value = Math.max(1, count.value - 1)
 }
 
 const increase = () => {
-    count.value += 1
+  count.value += 1
 }
 
 const addCart = () => {
-    const id = book.value.productId
-    if (!id) return
-    userStore.addToCart(id, count.value)
+  const id = book.value.productId
+  if (!id) return
+  userStore.addToCart(id, count.value)
 }
 
 const toggleFav = () => {
-    const id = book.value.productId
-    if (!id) return
-    userStore.toggleFavorite(id)
+  const id = book.value.productId
+  if (!id) return
+  userStore.toggleFavorite(id)
 }
 
-onMounted(() => {
-    axios.get("/products/detail?" + qs.stringify ({ id: route.params.id }))
-        .then(response => {
+const fetchDetail = async () => {
+  const id = route.params.id
+  if (!id) return
+  try {
+    const res = await axios.get("/products/detail?" + qs.stringify({ id }))
+    book.value = res.data?.data || {}
+    imageList.value = (book.value.description || "").split(";").filter(Boolean)
+    userStore.fetchFavorites()
+  } catch (error) {
+    toast('商品详情加载失败', 'error')
+  }
+}
 
-          console.log (response.data) ;
+onMounted(fetchDetail)
 
-          book.value = response.data.data || {};
-          imageList.value=(book.value.description || "").split(";").filter(Boolean)
-          userStore.fetchFavorites()
-
-        })
-        .catch(error => {
-          if (error.response.status == 504)
-          {
-
-            alert ("服务器没启动") ;
-
-          }
-        })
-});
+watch(() => route.params.id, () => {
+  count.value = 1
+  fetchDetail()
+})
 </script>
 <style>
-.book-detail{
-   display: flex;
+.detail-page{
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
-.book-left{
-    flex: 1;
+.hero{
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
 }
-.book-right{
-    flex: 4;
-    text-align: left;
-    color: rgb(114, 111, 111);
-    padding: 10px;
+.gallery-main img{
+  width: 100%;
+  height: 440px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.info{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #374151;
+}
+.title{
+  margin: 0;
+}
+.sub{
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+.price-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.price{
+  color: #ef4444;
+  font-size: 28px;
+  font-weight: 700;
+}
+.tag{
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+.tag.neutral{
+  background: #e0e7ff;
+  color: #4338ca;
 }
 .desc{
-    margin: 14px 0;
-}
-.book-price{
-    color: rgb(114, 111, 111);
-    text-decoration: line-through;
-}
-.addcart{
-    margin-top: 20px;
+  line-height: 1.6;
+  color: #4b5563;
 }
 .action-row{
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
 }
-.quantity{
-    width: 60px;
-    text-align: center;
+.quantity-box{
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
 }
-.bt-add{
-    color: rgb(252, 248, 248);
-    background-color: aqua;
-    width: 80px;
-    border: solid 1px rebeccapurple; 
-    height: 30px;
-    margin-left: 20px;
+.quantity-box button{
+  background: #f3f4f6;
+  border: none;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+.quantity-box input{
+  width: 60px;
+  height: 36px;
+  border: none;
+  text-align: center;
+}
+.bt-primary{
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 .bt-secondary{
-    border: 1px solid #2563eb;
-    color: #2563eb;
-    background: #fff;
-    height: 30px;
-    padding: 0 12px;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  background: #fff;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  cursor: pointer;
 }
-.gallery{
-    display: flex;
-    gap: 10px;
-    margin: 16px 0;
+.thumbs{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
 }
-.gallery img{
-    width: 120px;
-    height: 160px;
-    object-fit: cover;
-    border-radius: 6px;
+.thumb-item img{
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f9fafb;
 }
 </style>
