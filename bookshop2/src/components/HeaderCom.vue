@@ -4,7 +4,7 @@
           class="search-value"
           type="text"
           v-model="keyword"
-          placeholder="搜索书名、作者"
+          placeholder="搜索商品或品牌"
           @keyup.enter="triggerSearch"
         >
         <button class="bt-search" @click="triggerSearch">搜索</button>
