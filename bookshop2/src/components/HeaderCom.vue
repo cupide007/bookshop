@@ -12,7 +12,6 @@
 </template>
 
 <script setup>
-/* global defineEmits */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 

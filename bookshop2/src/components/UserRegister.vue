@@ -90,15 +90,13 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// 表单数据
 const form = reactive({
-  account: '',       // 账号
-  password: '',      // 密码
-  confirmPwd: '',    // 确认密码
-  phone: ''          // 手机号
+  account: '',
+  password: '',
+  confirmPwd: '',
+  phone: ''
 })
 
-// 验证信息
 const validate = reactive({
   account: '',
   password: '',
@@ -106,11 +104,9 @@ const validate = reactive({
   phone: ''
 })
 
-// 状态控制
-const isLoading = ref(false)       // 注册加载状态
-const showPassword = ref(false)    // 密码显示/隐藏
+const isLoading = ref(false)
+const showPassword = ref(false)
 
-// 账号验证规则：6-20位字母/数字组合
 const validateAccount = () => {
   const reg = /^[a-zA-Z0-9]{6,20}$/
   if (!form.account.trim()) {
@@ -122,7 +118,6 @@ const validateAccount = () => {
   }
 }
 
-// 密码验证规则：8-20位包含字母和数字
 const validatePassword = () => {
   const reg = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,20}$/
   if (!form.password.trim()) {
@@ -134,7 +129,6 @@ const validatePassword = () => {
   }
 }
 
-// 确认密码验证
 const validateConfirmPwd = () => {
   if (!form.confirmPwd.trim()) {
     validate.confirmPwd = '请确认密码'
@@ -145,7 +139,6 @@ const validateConfirmPwd = () => {
   }
 }
 
-// 手机号验证规则：11位有效手机号
 const validatePhone = () => {
   const reg = /^1[3-9]\d{9}$/
   if (!form.phone.trim()) {
@@ -157,34 +150,24 @@ const validatePhone = () => {
   }
 }
 
-// 整体表单验证
 const validateForm = () => {
-  // 触发所有字段验证
   validateAccount()
   validatePassword()
   validateConfirmPwd()
   validatePhone()
 
-  // 检查是否有验证错误
   return !Object.values(validate).some(item => item !== '')
 }
 
-// 注册处理逻辑
 const handleRegister = async () => {
-  // 先验证表单
   if (!validateForm()) return
 
   try {
     isLoading.value = true
     
-    // 模拟注册请求（实际项目替换为真实接口）
-    // await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // 注册成功逻辑
     console.log('注册成功', form)
     alert('注册成功！即将跳转到登录页')
     
-    // 清空表单
     form.account = ''
     form.password = ''
     form.confirmPwd = ''
@@ -202,7 +185,6 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-/* 整体容器 */
 .register-container {
   
   display: flex;
@@ -212,7 +194,6 @@ const handleRegister = async () => {
   padding: 20px;
 }
 
-/* 注册卡片 */
 .register-card {
   width: 100%;
   max-width: 450px;
@@ -223,7 +204,6 @@ const handleRegister = async () => {
   box-sizing: border-box;
 }
 
-/* 注册标题 */
 .register-title {
   text-align: center;
   margin: 0 0 30px 0;
@@ -232,18 +212,15 @@ const handleRegister = async () => {
   font-weight: 600;
 }
 
-/* 表单样式 */
 .register-form {
   width: 100%;
 }
 
-/* 表单项 */
 .form-item {
   margin-bottom: 24px;
   position: relative;
 }
 
-/* 标签样式 */
 .form-label {
   display: block;
   margin-bottom: 8px;
@@ -252,7 +229,6 @@ const handleRegister = async () => {
   font-weight: 500;
 }
 
-/* 输入框基础样式 */
 .form-input {
   width: 100%;
   height: 44px;
@@ -270,12 +246,10 @@ const handleRegister = async () => {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* 密码输入框容器 */
 .password-wrapper {
   position: relative;
 }
 
-/* 密码显示/隐藏切换 */
 .password-toggle {
   position: absolute;
   right: 15px;
@@ -291,12 +265,10 @@ const handleRegister = async () => {
   color: #2563eb;
 }
 
-/* 错误状态 */
 .input-error {
   border-color: #ef4444;
 }
 
-/* 错误提示 */
 .error-tip {
   position: absolute;
   bottom: -20px;
@@ -306,7 +278,6 @@ const handleRegister = async () => {
   line-height: 1;
 }
 
-/* 注册按钮 */
 .register-btn {
   width: 100%;
   height: 44px;
@@ -329,7 +300,6 @@ const handleRegister = async () => {
   cursor: not-allowed;
 }
 
-/* 响应式适配 */
 @media (max-width: 480px) {
   .register-card {
     padding: 24px;

@@ -13,7 +13,6 @@ import BookComment from "./BookComment.vue"
 import BookQuestion from "./BookQuestion.vue"
 import { reactive,ref,defineProps } from "vue";
 
-//通过defineProps接受父组件的参数
 const introduce=defineProps(["introduce"])
 const tabs=reactive([
     {title:"Introduce",name:"图书介绍"},
@@ -22,7 +21,6 @@ const tabs=reactive([
 
 ])
 const currentIndex=ref(0)
-//@click="currentIndex=index">通过改变索引号获得当前组件
 const CurrentComponent=ref([
     BookIntroduce,BookComment,BookQuestion
 ])

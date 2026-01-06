@@ -11,7 +11,8 @@ export const useUserStore = defineStore('user', {
     userId: null,
     cart: [],
     favorites: [],
-    orders: []
+    orders: [],
+    lastOrderNumber: ''
   }),
   getters: {
     isLoggedIn: (state) => !!state.token,
@@ -33,6 +34,7 @@ export const useUserStore = defineStore('user', {
       this.cart = []
       this.favorites = []
       this.orders = []
+      this.lastOrderNumber = ''
     },
     async fetchCart() {
       if (!this.token) return
@@ -87,11 +89,20 @@ export const useUserStore = defineStore('user', {
       }))
       const res = await axios.post('/order', orderVoList, { params: { addressId } })
       if (res.data?.success) {
+        this.lastOrderNumber = res.data.data || ''
         await this.fetchCart()
         await this.fetchOrders()
         return res.data.data
       }
       return null
+    },
+    async payOrder(orderNumber) {
+      if (!orderNumber) return null
+      const res = await axios.post('/payOrder', null, { params: { orderNumber } })
+      if (res.data?.success) {
+        await this.fetchOrders()
+      }
+      return res.data
     }
   },
   persist: true
