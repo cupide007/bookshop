@@ -4,8 +4,8 @@
       <div class="brand">
         <img alt="网站 logo" src="./assets/book.png" height="54">
         <div>
-          <h1>书城商城</h1>
-          <p class="subtitle">发现好书 · 畅读经典</p>
+          <h1>优品商城</h1>
+          <p class="subtitle">发现好物 · 便捷购物</p>
         </div>
       </div>
 
