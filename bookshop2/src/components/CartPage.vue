@@ -42,6 +42,7 @@
       <div v-if="newOrderNumber" class="payment-tip">
         <p>订单已生成：{{ newOrderNumber }}</p>
         <button class="action primary" @click="payNow">立即支付</button>
+        <router-link class="link" :to="{ path: '/pay', query: { orderNumber: newOrderNumber } }">前往支付页</router-link>
         <router-link class="link" to="/orders">查看订单</router-link>
       </div>
       <p v-if="successMessage" class="success">{{ successMessage }}</p>

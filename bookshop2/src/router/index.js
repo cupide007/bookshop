@@ -14,6 +14,7 @@ const routes = [
     { path: "/cart", component: () => import("@/components/CartPage.vue"), name: "cart", meta: { title: "购物车", requiresAuth: true } },
     { path: "/orders", component: () => import("@/components/OrdersPage.vue"), name: "orders", meta: { title: "订单中心", requiresAuth: true } },
     { path: "/favorites", component: () => import("@/components/FavoritesPage.vue"), name: "favorites", meta: { title: "收藏夹", requiresAuth: true } },
+    { path: "/pay", component: () => import("@/components/PaymentPage.vue"), name: "pay", meta: { title: "支付订单", requiresAuth: true } },
 ]
 const router = createRouter({
     history: createWebHashHistory(),
