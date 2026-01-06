@@ -33,6 +33,7 @@
     <footer class="site-footer">
       <p>© 2024 书城商城 | 提供图书检索、购物车、订单、收藏等功能</p>
     </footer>
+    <ToastHost/>
   </div>
 </template>
 
@@ -42,6 +43,7 @@ import { useRouter } from 'vue-router'
 import HeaderCom from "@/components/HeaderCom.vue";
 import MyMens from "@/components/MyMenus.vue"
 import { useUserStore } from './stores/user'
+import ToastHost from "@/components/ToastHost.vue"
 
 const router = useRouter()
 const userStore = useUserStore()
