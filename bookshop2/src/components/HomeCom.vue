@@ -1,35 +1,42 @@
 <template>
     <div class="home">
-        <BookCategory class="home-left"/>
-        <BookSwiper class="home-mid"/>
-        <BookHot class="home-right"/>
-        <BooksNew class="book-new" />
+        <aside class="side">
+            <BookCategory/>
+        </aside>
+        <section class="main">
+            <BookHot class="block"/>
+            <BooksNew class="block" />
+        </section>
     </div>
 </template>
 <script setup>
 import BookCategory from './BookCategory.vue'
-import BookSwiper from './BookSwiper.vue'
 import BookHot from './BookHot.vue'
 import BooksNew from './BooksNew.vue'
 </script>
 <style>
 .home{
     width: 100%;
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
     margin-top: 30px;
-    
 }
-.home-left,.home-right{
-    float: left;
-    width: 25%;
-    
+.side{
+    background: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
-.home-mid{
-    float: left;
-    width: 50%;
+.main{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
-.book-new{
-    width: 100%;
-    overflow: hidden;
+.block{
+    background: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 </style>
