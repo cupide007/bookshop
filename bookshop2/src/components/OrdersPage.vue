@@ -28,9 +28,9 @@
         </div>
         <footer class="order-foot">
           <span>总额：￥{{ order.totalAmount }}</span>
-          <span class="total">状态：{{ order.status }}</span>
+          <span class="total">状态：{{ statusLabel(order.status) }}</span>
           <button
-            v-if="order.status === 'pending'"
+            v-if="isUnpaid(order.status)"
             class="pay-btn"
             @click="toPay(order.orderNumber)"
           >
@@ -54,6 +54,14 @@ const router = useRouter()
 const resolveImage = (src) => {
   if (!src) return 'https://via.placeholder.com/60x80?text=Book'
   return src.startsWith('http') ? src : `/api/res/images/${src}`
+}
+
+const isUnpaid = (status) => {
+  return status === 'pending' || status === 'UNPAID' || status === 0 || status === '0' || status === '未支付'
+}
+
+const statusLabel = (status) => {
+  return isUnpaid(status) ? '未支付' : '已支付'
 }
 
 const toPay = (orderNumber) => {
