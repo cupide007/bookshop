@@ -12,7 +12,6 @@
           <span class="tag">库存 {{ book.stock || 0 }}</span>
           <span class="tag neutral">{{ discountLabel }}</span>
         </div>
-        <p class="desc">{{ brief }}</p>
         <div class="action-row">
           <div class="quantity-box">
             <button @click="decrease">-</button>
@@ -22,12 +21,6 @@
           <button class="bt-primary" @click="addCart">加入购物车</button>
           <button class="bt-secondary" @click="toggleFav">{{ favoriteText }}</button>
         </div>
-      </div>
-    </div>
-
-    <div class="thumbs" v-if="imageList.length">
-      <div v-for="(image,index) in imageList" :key="index" class="thumb-item">
-        <img :src="resolveImage(image)" alt="">
       </div>
     </div>
 
@@ -59,6 +52,12 @@
       </div>
       <div v-else class="empty">还没有评价，快来成为第一个吧</div>
     </section>
+
+    <div class="thumbs" v-if="imageList.length">
+      <div v-for="(image,index) in imageList" :key="index" class="thumb-item">
+        <img :src="resolveImage(image)" alt="">
+      </div>
+    </div>
   </section>
 </template>
 <script setup>
@@ -91,12 +90,6 @@ const categoryMap = {
 const categoryName = computed(() => {
   const id = book.value.categoryId
   return categoryMap[id] || '其他'
-})
-
-const brief = computed(() => {
-  if (!book.value.description) return '商品简介加载中...'
-  const parts = book.value.description.split(';').filter(Boolean)
-  return parts[0] || book.value.description
 })
 
 const discountLabel = computed(() => {
@@ -135,7 +128,7 @@ const fetchDetail = async () => {
   try {
     const res = await axios.get("/products/detail?" + qs.stringify({ id }))
     book.value = res.data?.data || {}
-    imageList.value = (book.value.description || "").split(";").filter(Boolean)
+    imageList.value = (book.value.imageUrl || "").split(";").filter(Boolean)
     userStore.fetchFavorites()
     fetchReviews()
   } catch (error) {
