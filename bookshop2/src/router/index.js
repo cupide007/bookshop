@@ -7,7 +7,6 @@ const routes = [
     { path: "/register", component: () => import("@/components/UserRegister.vue"), name: "register", meta: { title: "注册" } },
     { path: "/book/:id", component: () => import("@/components/BookDetail.vue"), name: "book", meta: { title: "图书详情" } },
     { path: "/search", component: () => import("@/components/SearchBook.vue"), name: "search", meta: { title: "搜索" } },
-    { path: "/video-resources", component: () => import("@/components/VideoResource.vue"), name: "videos", meta: { title: "视频资源" } },
     { path: "/personal-center", component: () => import("@/components/PersonalCenter.vue"), name: "personalCenter", meta: { title: "个人中心", requiresAuth: true } },
     { path: "/cart", component: () => import("@/components/CartPage.vue"), name: "cart", meta: { title: "购物车", requiresAuth: true } },
     { path: "/orders", component: () => import("@/components/OrdersPage.vue"), name: "orders", meta: { title: "订单中心", requiresAuth: true } },
