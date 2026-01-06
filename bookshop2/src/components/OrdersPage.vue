@@ -29,6 +29,13 @@
         <footer class="order-foot">
           <span>总额：￥{{ order.totalAmount }}</span>
           <span class="total">状态：{{ order.status }}</span>
+          <button
+            v-if="order.status === 'pending'"
+            class="pay-btn"
+            @click="pay(order.orderNumber)"
+          >
+            立即支付
+          </button>
         </footer>
       </article>
     </div>
@@ -36,15 +43,28 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const orders = computed(() => userStore.orders)
+const message = ref('')
 
 const resolveImage = (src) => {
   if (!src) return 'https://via.placeholder.com/60x80?text=Book'
   return src.startsWith('http') ? src : `/api/res/images/${src}`
+}
+
+const pay = async (orderNumber) => {
+  const res = await userStore.payOrder(orderNumber)
+  if (res?.success) {
+    message.value = '支付成功'
+  } else {
+    message.value = res?.message || '支付失败'
+  }
+  setTimeout(() => {
+    message.value = ''
+  }, 3000)
 }
 
 onMounted(() => {
@@ -134,5 +154,14 @@ onMounted(() => {
 .total {
   font-weight: 700;
   color: #e43f3b;
+}
+
+.pay-btn{
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 </style>

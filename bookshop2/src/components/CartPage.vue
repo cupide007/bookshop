@@ -29,6 +29,11 @@
         <button class="action primary" @click="submitOrder">提交订单</button>
       </footer>
 
+      <div v-if="newOrderNumber" class="payment-tip">
+        <p>订单已生成：{{ newOrderNumber }}</p>
+        <button class="action primary" @click="payNow">立即支付</button>
+        <router-link class="link" to="/orders">查看订单</router-link>
+      </div>
       <p v-if="successMessage" class="success">{{ successMessage }}</p>
     </div>
   </section>
@@ -40,6 +45,7 @@ import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const successMessage = ref('')
+const newOrderNumber = ref('')
 
 const cartItems = computed(() => userStore.cart)
 const cartCount = computed(() => userStore.cartCount)
@@ -57,11 +63,27 @@ const remove = (id) => {
 const submitOrder = async () => {
   const orderNumber = await userStore.checkout()
   if (orderNumber) {
-    successMessage.value = `订单提交成功（编号：${orderNumber}）`
+    newOrderNumber.value = orderNumber
+    successMessage.value = `订单提交成功（编号：${orderNumber}），请尽快支付`
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
   }
+}
+
+const payNow = async () => {
+  if (!newOrderNumber.value) return
+  const res = await userStore.payOrder(newOrderNumber.value)
+  if (res?.success) {
+    successMessage.value = '支付成功'
+    newOrderNumber.value = ''
+    await userStore.fetchOrders()
+  } else {
+    successMessage.value = res?.message || '支付失败'
+  }
+  setTimeout(() => {
+    successMessage.value = ''
+  }, 3000)
 }
 
 onMounted(() => {
@@ -170,6 +192,16 @@ onMounted(() => {
 .action.primary {
   background: #2563eb;
   color: #fff;
+}
+
+.payment-tip{
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f0f7ff;
+  padding: 10px;
+  border-radius: 8px;
 }
 
 .success {
