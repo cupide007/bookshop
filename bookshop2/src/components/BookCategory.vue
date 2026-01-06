@@ -1,30 +1,49 @@
 <template>
     <div>
-        <h2>图书分类</h2>
-        <div v-for="book in books" :key="book.id">
-            <h5>{{book.name}}</h5>
-            <div class="item" v-for="item in book.children" :key="item.id">
-                <router-link to="">{{item.name}}</router-link>
+        <h2>商品分类</h2>
+        <div v-for="category in categories" :key="category.categoryId">
+            <h5>{{ category.name }}</h5>
+            <div class="item" v-for="item in category.products" :key="item.productId">
+                <router-link :to="{ path: '/book/'+item.productId }">{{ item.name }}</router-link>
             </div>
         </div>
     </div>
 </template>
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
-const books=ref("")
+const rawProducts = ref([])
+const categoryMap = {
+  1: '电子产品',
+  2: '服装',
+  3: '家居用品',
+  4: '食品'
+}
 
+const categories = computed(() => {
+  const grouped = Object.keys(categoryMap).map((id) => ({
+    categoryId: Number(id),
+    name: categoryMap[id],
+    products: []
+  }))
 
-onMounted(()=>{
-    axios.get("/category")
-    .then(res=>{
-        console.log(res);
-        books.value=res.data
-        console.log(books);
+  rawProducts.value.forEach((p) => {
+    const cat = grouped.find((g) => g.categoryId === p.categoryId)
+    if (cat && cat.products.length < 4) {
+      cat.products.push(p)
+    }
+  })
+  return grouped
+})
+
+onMounted(() => {
+  axios.get("/products/list", { params: { page: 1, pageSize: 50 } })
+    .then(res => {
+      rawProducts.value = res.data?.data || []
     })
-    .catch(err=>{
-        console.log(err);
+    .catch(err => {
+      console.log(err);
     })
 })
 </script>

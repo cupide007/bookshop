@@ -49,9 +49,11 @@
 import { ref, reactive } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 // 1. 初始化路由实例（修复未声明router的问题）
 const router = useRouter()
+const userStore = useUserStore()
 
 // 表单数据
 const form = reactive({
@@ -112,14 +114,18 @@ const handleLogin = async () => {
     console.log(response.data)
     alert(response.data.message || '登录成功')
 
-    // 修复：nill → null（拼写错误）
-    if (response.data.data !== null) {
-      sessionStorage.setItem("Authorization", response.data.data)
-    }
+    const payload = response.data.data || {}
+    userStore.setUser({
+      token: payload.token || '',
+      username: payload.username || form.account,
+      userId: payload.userId
+    })
+    await userStore.fetchCart()
+    await userStore.fetchFavorites()
 
     // 登录成功跳转首页
     if (response.data.status === 200) {
-      router.push('/')
+      router.push(router.currentRoute.value.query.redirect || '/')
     }
   } catch (error) {
     // 完善错误处理，避免error.response不存在时报错

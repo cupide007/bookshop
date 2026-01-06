@@ -86,6 +86,9 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 表单数据
 const form = reactive({
@@ -187,8 +190,7 @@ const handleRegister = async () => {
     form.confirmPwd = ''
     form.phone = ''
     
-    // 可添加路由跳转逻辑
-    // 例如：router.push('/login')
+    router.push('/login')
 
   } catch (error) {
     console.error('注册失败', error)
