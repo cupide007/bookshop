@@ -140,7 +140,7 @@ const fetchReviews = async () => {
   const id = route.params.id
   if (!id) return
   try {
-    const res = await axios.get('/comments', { params: { productId: id } })
+    const res = await axios.get('/productReviews', { params: { productId: id } })
     if (res.data?.success) {
       reviews.value = res.data.data || []
     } else {
@@ -165,7 +165,7 @@ const submitReview = async () => {
   if (!id) return
   submitting.value = true
   try {
-    const res = await axios.post('/addComment', { productId: id, content: newReview.value.trim() })
+    const res = await axios.post('/addReview', { productId: id, content: newReview.value.trim() })
     if (res.data?.success) {
       toast(res.data?.message || '评价成功', 'success')
       newReview.value = ''
