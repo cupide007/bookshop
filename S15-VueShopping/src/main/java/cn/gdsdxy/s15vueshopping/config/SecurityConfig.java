@@ -26,15 +26,13 @@ public class SecurityConfig {
                                 "/login",
                                 "/register",
                                 "/res/**",
-                                "/products/**",      // 确保这里的路径覆盖了 /products/detail
-                                "/productReviews",   // 评价列表
-                                "/upload",           // 图片上传(如果是公开的)
-                                "/swagger-ui/**"     // 如果有文档
+                                "/products/**",
+                                "/productReviews",
+                                "/upload",
+                                "/swagger-ui/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // 2. [关键] 将 JWT 过滤器添加到 UsernamePasswordAuthenticationFilter 之前
-                // 这样请求进来会先走你的过滤器解析 Token，然后再走 Security 的权限判断
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -42,37 +42,6 @@ public class ShopUserController {
         return shopUserService.register(shopUser);
     }
 
-        @PostMapping("/register/uploadFile")
-        public FwResult uploadFile(MultipartFile file) {
-            // 默认文件上传成功，并返回状态信息
-//        model.addAttribute("uploadStatus", "上传成功！");
-            // 获取文件名以及后缀名
-            String fileName = file.getOriginalFilename();
-            // 重新生成文件名（根据具体情况生成对应文件名）
-            fileName = UUID.randomUUID()+"_"+fileName;
-
-            String dirPath=System.getProperty("user.dir")+"/resource/images/";//前面的方法用来获取当前项目的根目录，后面不包含\
-            try {
-                //通过下面的代码处理中文路径的问题
-                dirPath = URLDecoder.decode(dirPath, "utf-8");//处理空格转化为%20
-
-                File filePath = new File(dirPath);
-                if(!filePath.exists()){
-                    filePath.mkdirs();
-                }
-
-                file.transferTo(new File(dirPath+fileName));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return FwResult.failedMsg("上传失败");
-                // 上传失败，返回失败信息
-//                model.addAttribute("uploadStatus","上传失败： "+e.getMessage());
-            }
-
-            return FwResult.ok(fileName,"上传成功");//将上传后的文件名传给前端页面
-        }
-
     }
 
 

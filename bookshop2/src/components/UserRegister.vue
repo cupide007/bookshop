@@ -87,6 +87,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from "axios";
 
 const router = useRouter()
 
@@ -160,28 +161,43 @@ const validateForm = () => {
 }
 
 const handleRegister = async () => {
+  // 防止重复提交
+  if (isLoading.value) return
+
   if (!validateForm()) return
 
+  isLoading.value = true
   try {
-    isLoading.value = true
-    
-    console.log('注册成功', form)
-    alert('注册成功！即将跳转到登录页')
-    
-    form.account = ''
-    form.password = ''
-    form.confirmPwd = ''
-    form.phone = ''
-    
-    router.push('/login')
+    const { data } = await axios.post("/register", {
+      username: form.account.trim(),
+      password: form.password
+    })
 
+    console.log("注册成功", data)
+    alert("注册成功！即将跳转到登录页")
+
+    // 清空表单
+    Object.assign(form, {
+      account: "",
+      password: "",
+      confirmPwd: "",
+      phone: ""
+    })
+
+    await router.push("/login")
   } catch (error) {
-    console.error('注册失败', error)
-    alert('注册失败，请稍后重试')
+    console.error("注册失败", error)
+    const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.msg ||
+        error?.message ||
+        "注册失败，请稍后重试"
+    alert(msg)
   } finally {
     isLoading.value = false
   }
 }
+
 </script>
 
 <style scoped>
